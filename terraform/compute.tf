@@ -8,14 +8,14 @@ data "oci_core_images" "ubuntu_arm" {
   operating_system_version = "22.04"
   shape                    = "VM.Standard.A1.Flex"
   sort_by                  = "TIMECREATED"
-  sort_order                = "DESC"
+  sort_order               = "DESC"
 }
 
 resource "oci_core_instance" "agent_vm" {
   compartment_id      = var.compartment_ocid
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   display_name        = var.instance_display_name
-  shape                = "VM.Standard.A1.Flex"
+  shape               = "VM.Standard.A1.Flex"
 
   shape_config {
     ocpus         = var.ocpus
@@ -34,6 +34,6 @@ resource "oci_core_instance" "agent_vm" {
 
   metadata = {
     ssh_authorized_keys = file(var.ssh_public_key_path)
-    user_data            = base64encode(file("${path.module}/cloud-init.yaml"))
+    user_data           = base64encode(file("${path.module}/cloud-init.yaml"))
   }
 }

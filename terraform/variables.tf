@@ -38,13 +38,13 @@ variable "instance_display_name" {
 variable "ocpus" {
   description = "Núcleos ARM (Always Free permite até 4 no total)"
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "memory_in_gbs" {
   description = "Memória em GB (Always Free permite até 24 no total)"
   type        = number
-  default     = 24
+  default     = 12
 }
 
 variable "ssh_public_key_path" {

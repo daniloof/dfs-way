@@ -5,6 +5,6 @@ private_key_path     = "~/.oci/oci_api_key.pem"
 region                = "sa-saopaulo-1"
 compartment_ocid     = "ocid1.compartment.oc1..xxxxxxx"
 
-ssh_public_key_path  = "~/.ssh/id_rsa.pub"
+ssh_public_key_path = "~/.ssh/oci_vm_key.pub"
 
 ssh_allowed_cidr     = "0.0.0.0/0"

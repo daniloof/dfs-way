@@ -28,35 +28,20 @@ resource "oci_core_security_list" "agent_sl" {
   vcn_id         = oci_core_vcn.agent_vcn.id
   display_name   = "whatsapp-agent-sl"
 
+  # Permite que a VM faça conexões de saída.
   egress_security_rules {
     destination = "0.0.0.0/0"
     protocol    = "all"
   }
 
+  # SSH - restrito ao CIDR definido em terraform.tfvars.
   ingress_security_rules {
     protocol = "6"
     source   = var.ssh_allowed_cidr
+
     tcp_options {
       min = 22
       max = 22
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 8080
-      max = 8080
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 5678
-      max = 5678
     }
   }
 }
