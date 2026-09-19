@@ -248,6 +248,11 @@ n8nio/n8n:latest
 
 n8n is responsible for workflow orchestration.
 
+The current deployment uses n8n user management. The instance Owner is
+pre-provisioned from environment variables. The Owner password is supplied to
+n8n only as a bcrypt hash. The real Owner values remain in `docker/.env` on the
+VM and are never committed to Git.
+
 ---
 
 # Getting Started
@@ -320,12 +325,18 @@ docker/.env
 
 The real `.env` must never be committed.
 
+The repository may retain `N8N_USER` and `N8N_PASSWORD` in the environment
+template for compatibility with the current Compose file, but modern n8n user
+management does not use the old Basic Auth mechanism for login. The actual Owner
+is configured with `N8N_INSTANCE_OWNER_*`.
+
 Important secrets include:
 
 ```text
 POSTGRES_PASSWORD
 EVOLUTION_API_KEY
 N8N_PASSWORD
+N8N_INSTANCE_OWNER_PASSWORD_HASH
 LLM_API_KEY
 ```
 
@@ -408,6 +419,38 @@ The current OCI configuration allows external SSH access through TCP 22.
 
 Public HTTPS access will be introduced later through a dedicated production
 configuration.
+
+---
+
+# n8n Owner provisioning
+
+The current self-hosted n8n instance uses environment-based Owner provisioning.
+The relevant values live only in `docker/.env` on the VM.
+
+```text
+docker/.env.example  → variable names/documentation only
+docker/.env          → real credentials, VM only
+```
+
+The Owner variables are:
+
+```text
+N8N_INSTANCE_OWNER_MANAGED_BY_ENV
+N8N_INSTANCE_OWNER_EMAIL
+N8N_INSTANCE_OWNER_FIRST_NAME
+N8N_INSTANCE_OWNER_LAST_NAME
+N8N_INSTANCE_OWNER_PASSWORD_HASH
+```
+
+`N8N_INSTANCE_OWNER_PASSWORD_HASH` must contain a bcrypt hash, not a plaintext
+password. After startup, verify the n8n logs for:
+
+```text
+Owner was set up successfully
+```
+
+The current development instance is accessed through private GitHub Codespaces
+port forwarding/SSH tunneling. OCI currently exposes only SSH (TCP 22) publicly.
 
 ---
 
@@ -513,6 +556,16 @@ Docker Compose stack and this documentation.
 ---
 
 # Known Lessons
+
+## n8n / PostgreSQL compatibility warning
+
+The current validated deployment uses PostgreSQL 15 because that is the image
+currently defined by the Compose stack. The installed n8n 2.39.8 reports a
+startup warning recommending PostgreSQL 17 or newer, with PostgreSQL 16 in
+compatibility support. The stack is currently operational, but the PostgreSQL
+image/version should be upgraded in a planned maintenance step before treating
+the environment as production-ready.
+
 
 ## OCI A1 capacity
 

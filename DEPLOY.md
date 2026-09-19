@@ -171,6 +171,17 @@ N8N_PUBLIC_URL=http://localhost:5678/
 N8N_USER=<USER>
 N8N_PASSWORD=<SECRET>
 
+> `N8N_USER` and `N8N_PASSWORD` are retained in the current template for
+> compatibility with the Compose file. Modern n8n user management uses the
+> instance Owner configured below rather than legacy Basic Auth.
+
+# n8n Owner provisioning
+N8N_INSTANCE_OWNER_MANAGED_BY_ENV=true
+N8N_INSTANCE_OWNER_EMAIL=<OWNER_EMAIL>
+N8N_INSTANCE_OWNER_FIRST_NAME=<OWNER_FIRST_NAME>
+N8N_INSTANCE_OWNER_LAST_NAME=<OWNER_LAST_NAME>
+N8N_INSTANCE_OWNER_PASSWORD_HASH=<BCRYPT_HASH>
+
 TZ=America/Sao_Paulo
 
 LLM_API_KEY=<SECRET>
@@ -183,6 +194,26 @@ chmod 600 docker/.env
 ```
 
 Nunca commite o `.env`.
+
+O `.env.example` contém apenas nomes de variáveis e valores de exemplo. O
+`.env` real, incluindo o hash bcrypt do Owner, fica somente na VM.
+
+### Provisionar o Owner do n8n
+
+O n8n atual usa gerenciamento de usuários. Para este projeto, o Owner é
+pré-provisionado pelas variáveis `N8N_INSTANCE_OWNER_*`. Esse recurso está
+disponível a partir do n8n 2.17.0.
+
+`N8N_INSTANCE_OWNER_PASSWORD_HASH` precisa ser um hash bcrypt; não coloque a
+senha em texto puro. Na VM, o hash pode ser gerado sem expor a senha na linha
+de comando:
+
+```bash
+python3 -c 'import bcrypt, getpass; p=getpass.getpass("Senha do n8n: ").encode(); print(bcrypt.hashpw(p, bcrypt.gensalt()).decode())'
+```
+
+Copie o hash retornado para `N8N_INSTANCE_OWNER_PASSWORD_HASH` no `.env` real.
+Não envie o hash para o GitHub.
 
 ## 9. Gerar secrets
 
@@ -234,6 +265,27 @@ docker compose up -d
 docker compose ps
 ```
 
+Se o Owner foi configurado depois que o container n8n já existia, recrie somente
+o n8n:
+
+```bash
+docker compose up -d --force-recreate n8n
+```
+
+Verifique os logs:
+
+```bash
+docker logs n8n --tail 50
+```
+
+A configuração correta deve produzir:
+
+```text
+N8N_INSTANCE_OWNER_MANAGED_BY_ENV is enabled — applying owner env vars
+Owner was set up successfully
+```
+
+
 Esperado:
 
 ```text
@@ -244,6 +296,14 @@ redis           Up
 ```
 
 ## 13. Troubleshooting
+
+### n8n / PostgreSQL compatibility warning
+
+The current n8n 2.39.8 startup reports that PostgreSQL 15 is not supported and
+recommends PostgreSQL 17 or newer, with PostgreSQL 16 in compatibility support.
+The current stack is operational, but upgrading the PostgreSQL image/version is
+a planned maintenance task before production.
+
 
 Se algum container reiniciar:
 
@@ -385,7 +445,28 @@ EVOLUTION → N8N       OK
 
 Neste ponto, a infraestrutura base está operacional.
 
-## 20. Ainda não coberto
+## 20. Acesso administrativo ao n8n em desenvolvimento
+
+A configuração atual não expõe a porta 5678 publicamente. Durante o
+desenvolvimento, o n8n é acessado por um túnel SSH a partir do GitHub Codespaces.
+
+Conexão normal com a VM:
+
+```bash
+ssh -i ~/.ssh/oci_vm_key ubuntu@<IP_DA_VM>
+```
+
+Túnel do n8n:
+
+```bash
+ssh -4 -i ~/.ssh/oci_vm_key -N -L 5678:127.0.0.1:5678 ubuntu@<IP_DA_VM>
+```
+
+A porta 5678 pode ser encaminhada como porta privada no Codespaces. Esse túnel
+é para desenvolvimento/administração e não substitui HTTPS + domínio em
+produção.
+
+## 21. Ainda não coberto
 
 As etapas seguintes ficam para a camada de aplicação/produção:
 
@@ -407,7 +488,7 @@ As etapas seguintes ficam para a camada de aplicação/produção:
 - backup;
 - hardening de produção.
 
-## 21. Segurança
+## 22. Segurança
 
 Não versione:
 
@@ -424,6 +505,7 @@ Nunca publique:
 POSTGRES_PASSWORD
 EVOLUTION_API_KEY
 N8N_PASSWORD
+N8N_INSTANCE_OWNER_PASSWORD_HASH
 LLM_API_KEY
 OCI private key
 SSH private key
@@ -444,7 +526,7 @@ A configuração atual libera externamente apenas:
 TCP 22 — SSH
 ```
 
-## 22. Deploy rápido
+## 23. Deploy rápido
 
 ### Codespace / máquina administrativa
 
@@ -490,7 +572,7 @@ Se o último comando retornar:
 
 a infraestrutura base está validada.
 
-## 23. Próximo checkpoint
+## 24. Próximo checkpoint
 
 Depois do deploy:
 
