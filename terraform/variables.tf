@@ -32,7 +32,7 @@ variable "compartment_ocid" {
 variable "instance_display_name" {
   description = "Nome de exibição da VM"
   type        = string
-  default     = "whatsapp-insurance-agent"
+  default     = "dfs-way"
 }
 
 variable "ocpus" {

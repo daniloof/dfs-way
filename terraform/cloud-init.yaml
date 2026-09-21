@@ -29,5 +29,5 @@ runcmd:
   - systemctl start docker
 
   # Diretório do projeto
-  - mkdir -p /home/ubuntu/whatsapp-agent
-  - chown -R ubuntu:ubuntu /home/ubuntu/whatsapp-agent
+  - mkdir -p /home/ubuntu/dfs-way
+  - chown -R ubuntu:ubuntu /home/ubuntu/dfs-way

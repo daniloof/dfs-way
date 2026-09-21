@@ -1,7 +1,7 @@
-# Deploy Guide — WhatsApp Insurance Agent
+# Deploy Guide — DFS Way
 
 Este documento descreve como provisionar a infraestrutura e subir a stack base do
-WhatsApp Insurance Agent em uma nova VM OCI.
+DFS Way em uma nova VM OCI.
 
 > **Escopo**
 >
@@ -24,6 +24,12 @@ OCI
         └── PostgreSQL + pgvector
             ├── n8n
             └── evolution
+
+Application layer (planned)
+        └── n8n Orchestrator
+            ├── session / context
+            ├── intent classification
+            └── specialized agents
 ```
 
 A comunicação Evolution API → n8n ocorre pela rede interna do Docker.
@@ -43,7 +49,7 @@ O GitHub Codespaces pode ser usado para administração. A aplicação roda na V
 ## 3. Estrutura
 
 ```text
-whatsapp-insurance-agent/
+dfs-way/
 ├── docker/
 │   ├── docker-compose.yml
 │   ├── .env.example
@@ -137,8 +143,8 @@ Na VM:
 
 ```bash
 cd /home/ubuntu
-git clone https://github.com/daniloof/whatsapp-insurance-agent.git
-cd whatsapp-insurance-agent
+git clone https://github.com/daniloof/dfs-way.git
+cd dfs-way
 ```
 
 Se já estiver clonado:
@@ -547,8 +553,8 @@ ssh -i ~/.ssh/oci_vm_key ubuntu@<IP>
 
 ```bash
 cd /home/ubuntu
-git clone https://github.com/daniloof/whatsapp-insurance-agent.git
-cd whatsapp-insurance-agent
+git clone https://github.com/daniloof/dfs-way.git
+cd dfs-way
 
 cp docker/.env.example docker/.env
 nano docker/.env

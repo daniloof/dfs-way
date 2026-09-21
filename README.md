@@ -1,10 +1,10 @@
-# WhatsApp Insurance Agent
+# DFS Way
 
-AI agent for insurance customer service through WhatsApp.
+AI-powered customer service and orchestration platform, initially delivered through WhatsApp.
 
 The project is being built around a modular architecture where WhatsApp messaging,
-workflow orchestration, AI capabilities and persistent data are separated into
-independent components.
+workflow orchestration, AI capabilities, specialized agents and persistent data are
+separated into independent components.
 
 ## Architecture
 
@@ -38,11 +38,12 @@ independent components.
 | Component | Responsibility |
 |---|---|
 | **Evolution API** | WhatsApp integration and message adapter |
-| **n8n** | Workflow orchestration |
-| **PostgreSQL** | Persistent application/workflow data |
+| **n8n** | Workflow orchestration and routing |
+| **PostgreSQL** | Persistent application, workflow and conversation data |
 | **pgvector** | Vector storage for semantic search/RAG |
-| **Redis** | Cache and supporting state |
-| **LLM** | Natural-language understanding and generation |
+| **Redis** | Cache and supporting session state |
+| **LLM** | Natural-language understanding, classification and generation |
+| **Specialized agents** | Domain-specific conversation and business logic |
 | **Terraform** | Infrastructure as Code |
 | **Docker Compose** | Local/server service orchestration |
 | **OCI** | Cloud infrastructure |
@@ -85,32 +86,39 @@ Region:      sa-saopaulo-1
 
 ## Application
 
-The following layers are still under development:
+The application layer is still under development. The target architecture is a
+shared entry point with an orchestrator that keeps conversation/session context and
+routes each subject to a specialized agent.
 
 ```text
 WhatsApp
    ↓
 Evolution API
    ↓
-Webhook
-   ↓
 n8n
    ↓
-AI Agent
-   ↓
-LLM
-   ↓
-RAG / Database
-   ↓
-Response
+Orchestrator
+   ├── session / context
+   ├── intent classification
+   └── routing
+        ├── Insurance Agent
+        ├── Consórcio Agent
+        └── Other specialized agents
+                 ↓
+          LLM / Tools / RAG
+                 ↓
+              Response
 ```
+
+The architecture is intentionally designed so the WhatsApp channel, orchestration
+layer and specialized business agents remain separate.
 
 ---
 
 # Repository Structure
 
 ```text
-whatsapp-insurance-agent/
+dfs-way/
 │
 ├── docker/
 │   ├── docker-compose.yml
@@ -282,8 +290,8 @@ Clone the project:
 
 ```bash
 cd /home/ubuntu
-git clone https://github.com/daniloof/whatsapp-insurance-agent.git
-cd whatsapp-insurance-agent
+git clone https://github.com/daniloof/dfs-way.git
+cd dfs-way
 ```
 
 Configure the environment:
@@ -480,18 +488,21 @@ port forwarding/SSH tunneling. OCI currently exposes only SSH (TCP 22) publicly.
 - [ ] Send outbound messages
 - [ ] End-to-end message test
 
-## Phase 3 — AI Agent
+## Phase 3 — AI orchestration and specialized agents
 
 - [ ] LLM integration
-- [ ] Agent workflow
-- [ ] Conversation context
+- [ ] Orchestrator workflow
+- [ ] Conversation/session management
+- [ ] Intent classification and routing
+- [ ] Specialized agent workflow
 - [ ] Prompt/guardrails
-- [ ] Intent handling
 - [ ] Insurance business rules
+- [ ] Consórcio business rules
 
 ## Phase 4 — Knowledge and RAG
 
 - [ ] Document ingestion
+- [ ] Domain-specific knowledge bases
 - [ ] Embeddings
 - [ ] pgvector storage
 - [ ] Semantic search
@@ -523,9 +534,11 @@ WhatsApp connectivity should not contain business logic.
 ```text
 WhatsApp Adapter
       ↓
-Orchestration
+Orchestrator
       ↓
-Agent
+Session / Context
+      ↓
+Specialized Agent
       ↓
 Business Logic
       ↓
@@ -618,13 +631,13 @@ Connectivity
 Then:
 
 ```text
-Workflow
+Workflow / Orchestration
 ```
 
 Then:
 
 ```text
-AI Agent
+Specialized AI Agents
 ```
 
 Then:
