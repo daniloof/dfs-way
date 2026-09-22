@@ -36,4 +36,10 @@ resource "oci_core_instance" "agent_vm" {
     ssh_authorized_keys = file(var.ssh_public_key_path)
     user_data           = base64encode(file("${path.module}/cloud-init.yaml"))
   }
+
+  lifecycle {
+    ignore_changes = [
+      metadata["user_data"]
+    ]
+  }
 }

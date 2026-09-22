@@ -34,7 +34,7 @@ resource "oci_core_security_list" "agent_sl" {
     protocol    = "all"
   }
 
-  # SSH - restrito ao CIDR definido em terraform.tfvars.
+  # SSH
   ingress_security_rules {
     protocol = "6"
     source   = var.ssh_allowed_cidr
@@ -42,6 +42,29 @@ resource "oci_core_security_list" "agent_sl" {
     tcp_options {
       min = 22
       max = 22
+    }
+  }
+
+  # HTTP - usado pelo Caddy para obter/renovar certificados
+  # e redirecionar HTTP para HTTPS.
+  ingress_security_rules {
+    protocol = "6"
+    source   = "0.0.0.0/0"
+
+    tcp_options {
+      min = 80
+      max = 80
+    }
+  }
+
+  # HTTPS - acesso público ao n8n através do Caddy.
+  ingress_security_rules {
+    protocol = "6"
+    source   = "0.0.0.0/0"
+
+    tcp_options {
+      min = 443
+      max = 443
     }
   }
 }
