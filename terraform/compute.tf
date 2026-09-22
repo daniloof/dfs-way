@@ -29,7 +29,7 @@ resource "oci_core_instance" "agent_vm" {
 
   create_vnic_details {
     subnet_id        = oci_core_subnet.agent_subnet.id
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   metadata = {

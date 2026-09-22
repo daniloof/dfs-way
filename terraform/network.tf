@@ -56,3 +56,24 @@ resource "oci_core_subnet" "agent_subnet" {
   security_list_ids          = [oci_core_security_list.agent_sl.id]
   prohibit_public_ip_on_vnic = false
 }
+
+data "oci_core_vnic_attachments" "agent_vnic_attachments" {
+  compartment_id = var.compartment_ocid
+  instance_id    = oci_core_instance.agent_vm.id
+}
+
+data "oci_core_private_ips" "agent_private_ips" {
+  vnic_id = data.oci_core_vnic_attachments.agent_vnic_attachments.vnic_attachments[0].vnic_id
+
+  depends_on = [
+    oci_core_instance.agent_vm
+  ]
+}
+
+resource "oci_core_public_ip" "dfs_way_public_ip" {
+  compartment_id = var.compartment_ocid
+  display_name   = "dfs-way-public-ip"
+  lifetime       = "RESERVED"
+
+  private_ip_id = data.oci_core_private_ips.agent_private_ips.private_ips[0].id
+}
