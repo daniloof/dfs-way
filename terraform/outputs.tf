@@ -9,9 +9,11 @@ output "ssh_command" {
 }
 
 output "evolution_api_url" {
-  value = "http://${oci_core_public_ip.dfs_way_public_ip.ip_address}:8080"
+  description = "URL pública da Evolution API"
+  value       = "https://way.dfsconsulting.com.br"
 }
 
 output "n8n_url" {
-  value = "http://${oci_core_public_ip.dfs_way_public_ip.ip_address}:5678"
+  description = "URL pública do n8n"
+  value       = "https://way.dfsconsulting.com.br"
 }
