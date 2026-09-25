@@ -1,8 +1,8 @@
-data "oci_identity_availability_domains" "ads" {
+data "oci_identity_availability_domains" "dfs_way_ads" {
   compartment_id = var.tenancy_ocid
 }
 
-data "oci_core_images" "ubuntu_arm" {
+data "oci_core_images" "dfs_way_ubuntu_arm" {
   compartment_id           = var.compartment_ocid
   operating_system         = "Canonical Ubuntu"
   operating_system_version = "22.04"
@@ -11,9 +11,9 @@ data "oci_core_images" "ubuntu_arm" {
   sort_order               = "DESC"
 }
 
-resource "oci_core_instance" "agent_vm" {
+resource "oci_core_instance" "dfs_way_vm" {
   compartment_id      = var.compartment_ocid
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
+  availability_domain = data.oci_identity_availability_domains.dfs_way_ads.availability_domains[0].name
   display_name        = var.instance_display_name
   shape               = "VM.Standard.A1.Flex"
 
@@ -24,11 +24,11 @@ resource "oci_core_instance" "agent_vm" {
 
   source_details {
     source_type = "image"
-    source_id   = data.oci_core_images.ubuntu_arm.images[0].id
+    source_id   = data.oci_core_images.dfs_way_ubuntu_arm.images[0].id
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.agent_subnet.id
+    subnet_id        = oci_core_subnet.dfs_way_subnet.id
     assign_public_ip = false
   }
 

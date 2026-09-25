@@ -1,34 +1,33 @@
-resource "oci_core_vcn" "agent_vcn" {
+resource "oci_core_vcn" "dfs_way_vcn" {
   compartment_id = var.compartment_ocid
   cidr_block     = var.vcn_cidr
-  display_name   = "whatsapp-agent-vcn"
-  dns_label      = "agentvcn"
+  display_name   = "dfs-way-vcn"
+  dns_label      = "dfswayvcn"
 }
 
-resource "oci_core_internet_gateway" "agent_igw" {
+resource "oci_core_internet_gateway" "dfs_way_igw" {
   compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.agent_vcn.id
-  display_name   = "whatsapp-agent-igw"
+  vcn_id         = oci_core_vcn.dfs_way_vcn.id
+  display_name   = "dfs-way-internet-gateway"
   enabled        = true
 }
 
-resource "oci_core_route_table" "agent_rt" {
+resource "oci_core_route_table" "dfs_way_route_table" {
   compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.agent_vcn.id
-  display_name   = "whatsapp-agent-rt"
+  vcn_id         = oci_core_vcn.dfs_way_vcn.id
+  display_name   = "dfs-way-route-table"
 
   route_rules {
     destination       = "0.0.0.0/0"
-    network_entity_id = oci_core_internet_gateway.agent_igw.id
+    network_entity_id = oci_core_internet_gateway.dfs_way_igw.id
   }
 }
 
-resource "oci_core_security_list" "agent_sl" {
+resource "oci_core_security_list" "dfs_way_security_list" {
   compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.agent_vcn.id
-  display_name   = "whatsapp-agent-sl"
+  vcn_id         = oci_core_vcn.dfs_way_vcn.id
+  display_name   = "dfs-way-security-list"
 
-  # Permite que a VM faça conexões de saída.
   egress_security_rules {
     destination = "0.0.0.0/0"
     protocol    = "all"
@@ -45,8 +44,7 @@ resource "oci_core_security_list" "agent_sl" {
     }
   }
 
-  # HTTP - usado pelo Caddy para obter/renovar certificados
-  # e redirecionar HTTP para HTTPS.
+  # HTTP
   ingress_security_rules {
     protocol = "6"
     source   = "0.0.0.0/0"
@@ -57,7 +55,7 @@ resource "oci_core_security_list" "agent_sl" {
     }
   }
 
-  # HTTPS - acesso público ao n8n através do Caddy.
+  # HTTPS
   ingress_security_rules {
     protocol = "6"
     source   = "0.0.0.0/0"
@@ -69,27 +67,27 @@ resource "oci_core_security_list" "agent_sl" {
   }
 }
 
-resource "oci_core_subnet" "agent_subnet" {
+resource "oci_core_subnet" "dfs_way_subnet" {
   compartment_id             = var.compartment_ocid
-  vcn_id                     = oci_core_vcn.agent_vcn.id
+  vcn_id                     = oci_core_vcn.dfs_way_vcn.id
   cidr_block                 = var.subnet_cidr
-  display_name               = "whatsapp-agent-subnet"
-  dns_label                  = "agentsub"
-  route_table_id             = oci_core_route_table.agent_rt.id
-  security_list_ids          = [oci_core_security_list.agent_sl.id]
+  display_name               = "dfs-way-subnet"
+  dns_label                  = "dfswaysub"
+  route_table_id             = oci_core_route_table.dfs_way_route_table.id
+  security_list_ids          = [oci_core_security_list.dfs_way_security_list.id]
   prohibit_public_ip_on_vnic = false
 }
 
-data "oci_core_vnic_attachments" "agent_vnic_attachments" {
+data "oci_core_vnic_attachments" "dfs_way_vnic_attachments" {
   compartment_id = var.compartment_ocid
-  instance_id    = oci_core_instance.agent_vm.id
+  instance_id    = oci_core_instance.dfs_way_vm.id
 }
 
-data "oci_core_private_ips" "agent_private_ips" {
-  vnic_id = data.oci_core_vnic_attachments.agent_vnic_attachments.vnic_attachments[0].vnic_id
+data "oci_core_private_ips" "dfs_way_private_ips" {
+  vnic_id = data.oci_core_vnic_attachments.dfs_way_vnic_attachments.vnic_attachments[0].vnic_id
 
   depends_on = [
-    oci_core_instance.agent_vm
+    oci_core_instance.dfs_way_vm
   ]
 }
 
@@ -98,5 +96,5 @@ resource "oci_core_public_ip" "dfs_way_public_ip" {
   display_name   = "dfs-way-public-ip"
   lifetime       = "RESERVED"
 
-  private_ip_id = data.oci_core_private_ips.agent_private_ips.private_ips[0].id
+  private_ip_id = data.oci_core_private_ips.dfs_way_private_ips.private_ips[0].id
 }
